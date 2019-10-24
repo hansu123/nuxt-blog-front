@@ -1,6 +1,5 @@
 <template>
   <div class="articleList">
-   
     <el-row :gutter="20" style="padding-bottom:12px">
       <el-col
         :xs="24"
@@ -18,16 +17,18 @@
                 <b style="color:#b71ed7">专栏</b>
                 · {{item.author}} · {{item.postTime|DateFilter}}
                 ·
-                <i class="el-icon-price-tag"></i>
+                <i
+                  class="el-icon-price-tag"
+                ></i>
                 {{item.cate}}
               </span>
             </div>
             <div class="article_info">
               <div class="article_body">
                 <div class="post-title">
-                  <h1>{{item.title}}</h1>
+                  <h1 class="wes-2">{{item.title}}</h1>
                 </div>
-                <div class="post-abstract .wes-2">{{item.summary}}</div>
+                <div class="post-abstract wes-2">{{item.summary}}</div>
               </div>
               <div class="article_cover">
                 <img :src="item.cover_img" />
@@ -46,8 +47,6 @@
 
 <script>
 import { Loading } from "element-ui";
-import { dateFormat } from "../utils/index";
-dateFormat();
 export default {
   name: "ArticleList",
   props: {
@@ -83,7 +82,7 @@ export default {
     }
   },
   methods: {
-    articlesDetailsFn: function(id) {
+    articlesDetailsFn(id) {
       this.$router.push({ path: `/details/${id}` });
     }
   }
@@ -100,12 +99,27 @@ export default {
   .article_cover {
     flex: 1;
     img {
-      width: 100%;
+      width: 100px;
     }
   }
 }
 
 .artitem {
+  &:hover {
+    -moz-transition: all 0.3s ease-in-out;
+    -o-transition: all 0.3s ease-in-out;
+    -webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    -webkit-transform: translate3d(0, -3px, 0);
+    .post-title > h1 {
+      color: #1d8ce0 !important;
+      -moz-transition: all 0.3s ease-in-out;
+      -o-transition: all 0.3s ease-in-out;
+      -webkit-transition: all 0.3s ease-in-out;
+      transition: all 0.3s ease-in-out;
+    }
+  }
+
   &_container {
     padding: 16px 20px 0;
     overflow: hidden;
@@ -115,11 +129,47 @@ export default {
     box-shadow: 0 1px 2px rgba(151, 151, 151, 0.6);
     margin-bottom: 30px;
     position: relative;
+    &:hover {
+      background-color: #fafafa;
+      -moz-transition: all 0.3s ease-in-out;
+      -o-transition: all 0.3s ease-in-out;
+      -webkit-transition: all 0.3s ease-in-out;
+      transition: all 0.3s ease-in-out;
+      box-shadow: 0px 1px 1px 1px rgba(0, 0, 0, 0.1);
+      border-top: 1px solid #fff;
+      border-radius: 3px;
+    }
+    &:before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.5);
+      content: "";
+      -webkit-transform: scale3d(1.9, 1.4, 1) rotate3d(0, 0, 1, 45deg)
+        translate3d(0, -150%, 0);
+      transform: scale3d(1.9, 1.4, 1) rotate3d(0, 0, 1, 45deg)
+        translate3d(0, -150%, 0);
+      cursor: pointer;
+    }
+    &:hover:before {
+      -moz-transition: all 0.6s ease-in-out;
+      -o-transition: all 0.6s ease-in-out;
+      -webkit-transition: all 0.6s ease-in-out;
+      transition: all 0.6s ease-in-out;
+      -webkit-transform: scale3d(1.9, 1.4, 1) rotate3d(0, 0, 1, 45deg)
+        translate3d(0, 0%, 0);
+      transform: scale3d(1.9, 1.4, 1) rotate3d(0, 0, 1, 45deg)
+        translate3d(0, 0%, 0);
+      background-color: rgba(255, 255, 255, 0.1);
+    }
     .articles-box {
       width: 100%;
       margin-top: 10px;
       margin-bottom: 5px;
       text-align: center;
+      cursor: pointer;
     }
 
     .artitem_bottom {

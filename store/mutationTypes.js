@@ -1,1 +1,12 @@
+//github用户登录
+export const SET_USERINFO="SET_USERINFO"
+//文章
 export const SET_CATALOGUE="SET_CATALOGUE"
+export const SET_ARTICLELIST="SET_ARTICLELIST"
+export const SET_ARTICLEDETAIL="SET_ARTICLEDETAIL"
+
+//comment
+export const SET_COMMENT="SET_COMMENT"
+export const ADD_SUBCOMMENT="ADD_SUBCOMMENT"
+export const ADD_COMMENT="ADD_COMMENT"
+export const DEL_COMMENT="DEL_COMMENT"

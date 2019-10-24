@@ -1,21 +1,29 @@
 <template>
   <div id="articlesDetails" class="fadein">
     <div class="detail-header">
-      <h1>{{articleDetails.title}}</h1>
+      <h1>{{articleDetail.title}}</h1>
+      <div class="time">{{articleDetail.postTime|dateFilter}}</div>
+      <!-- <div class="detail-body-tag">
+        <span v-for="list in articleDetails.label" :key="list" class="tag">{{list}}</span>
+      </div>-->
     </div>
     <div class="detail-body" v-html="markHtml"></div>
-    <div class="detail-extra">
-      <a>上一篇：我和我的祖国</a>
+    <div class="detail_extra" v-if="extraArticleList.length">
+      <div
+        v-for="article of extraArticleList"
+        :key="article._id"
+        class="detail_extra_item"
+        @click="showDetail(article._id)"
+      >
+        <span v-if="article.type==='prev'&&article.title">上一篇:</span>
+        <span v-if="article.type==='next'&&article.title">下一篇:</span>
+        {{article.title}}
+      </div>
     </div>
     <div class="detail-footer">
-      <Comment :comment="articleDetails.comment" :authUrl="authUrl" />
+      <Comment :authUrl="authUrl" />
     </div>
-    <div v-show="background" class="background">
-      <div class="img-wrapper">
-        <img :src="backgroundImg" class="background-animate" />
-      </div>
-      <img src="../../assets/close.png" class="close" @click="hidePrview" />
-    </div>
+    <preview-image :imgSrc.sync="imgSrc"></preview-image>
     <el-backtop :bottom="100">
       <div
         style="{
@@ -33,108 +41,101 @@
 </template>
 
 <script>
-import { dateFormat } from "../../utils/index";
-import marked from "marked";
-// import axios from '~/plugins/axios';
-import highlight from "highlight.js/lib/highlight";
-import javascript from "highlight.js/lib/languages/javascript";
-import css from "highlight.js/lib/languages/css";
-import php from "highlight.js/lib/languages/php";
-import python from "highlight.js/lib/languages/python";
-import sql from "highlight.js/lib/languages/sql";
-import bash from "highlight.js/lib/languages/bash";
-highlight.registerLanguage("javascript", javascript);
-highlight.registerLanguage("css", css);
-highlight.registerLanguage("php", php);
-highlight.registerLanguage("python", python);
-highlight.registerLanguage("sql", sql);
-highlight.registerLanguage("bash", bash);
-import ArticleModel from "@/apis/articleModel";
-import Comment from "@/components/Comment";
+import marked from "@/utils/helpers/markdown";
+import { Comment } from "@/components";
 import "../../assets/hybrid.css";
-import { mapMutations } from "vuex";
-import BuildCatalogue from "@/libs/catalogue"
-dateFormat();
+import { mapState, mapMutations } from "vuex";
+import BuildCatalogue from "@/libs/catalogue";
+import PreviewImage from "@/components/common/PreviewImage";
 export default {
-  name: "Articledetails",
+  name: "Articledetail",
+  async fetch({ store, params }) {
+    let commentQuery = {
+      id: params.id,
+      pagesize:5,
+      currentPage:1
+    };
+    await store.dispatch("comment/GetCommentListAction", commentQuery)
+    let articleQuery={
+      id:params.id
+    }
+    return await store.dispatch("article/GetArticleDetailAction", articleQuery);
+  },
   data() {
     return {
-      background: false,
-      backgroundImg: "",
+      imgSrc: "",
       markHtml: "",
-      articleDetails: {}
+      extraArticleList: []
     };
   },
   head() {
     return {
-      title: this.articleDetails.title || "binlive",
+      title: this.articleDetail.title || "binlive",
       meta: [
         {
           hid: "description",
           name: "description",
-          content: `${this.articleDetails.title},前端开发,前端,web前端开发,node,vue,react,webpack,git`
+          content: `${this.articleDetail.title},前端开发,前端,web前端开发,node,vue,react,webpack,git`
         },
-        { name: "keywords", content: this.articleDetails.title }
+        { name: "keywords", content: this.articleDetail.title }
       ]
     };
   },
   async mounted() {
-    let query = {
-      _id: this.$route.params.id
-    };
-    let { data } = await this.$API.ArticleModel.GetArticleDetail(query);
-    this.articleDetails = data;
-    marked.setOptions({
-      renderer: new marked.Renderer(),
-      gfm: true,
-      tables: true,
-      breaks: false,
-      pedantic: false,
-      sanitize: false,
-      smartLists: true,
-      smartypants: false,
-      highlight: function(code, lang) {
-        return highlight.highlightAuto(code).value;
-      }
-    });
-
-    this.markHtml = marked(this.articleDetails.content);
+    this.markHtml = marked(this.articleDetail.content);
     this.$nextTick(function() {
-      let catalogues=new BuildCatalogue({className:"detail-body"})
+      let catalogues = new BuildCatalogue({ className: "detail-body" });
       this.SET_CATALOGUE(catalogues.getFinalTree());
     });
 
-    document.querySelectorAll(".detail-body img").forEach(item => {
-      item.addEventListener("click", () => {
-        document.documentElement.style.overflow = "hidden";
-        this.background = true;
-        this.backgroundImg = item.src;
+    //图片预览
+    this.$nextTick(() => {
+      document.querySelectorAll(".detail-body img").forEach(item => {
+        item.addEventListener("click", () => {
+          this.imgSrc = item.src;
+        });
       });
     });
+
+    //上一篇和下一篇
+    this.extraArticleList = this.articleList.reduce((prev, curr, index) => {
+      if (curr._id === this.$route.params.id) {
+        if (index >= 1) {
+          let { _id, title } = this.articleList[index - 1];
+          prev.push({ _id, title, type: "prev" });
+        } else {
+          prev.push({});
+        }
+
+        if (index < this.articleList.length - 1) {
+          let { _id, title } = this.articleList[index + 1];
+          prev.push({ _id, title, type: "next" });
+        } else {
+          prev.push({});
+        }
+      }
+      return prev;
+    }, []);
+    console.log("extra", this.extraArticleList);
   },
   methods: {
-    hidePrview() {
-      this.background = false;
-      this.backgroundImg = "";
-      document.documentElement.style.overflow = "auto";
+    showDetail(id) {
+      this.$router.push({ path: `/details/${id}` });
     },
     ...mapMutations("article", ["SET_CATALOGUE"])
   },
   computed: {
     authUrl() {
       const id = this.$route.params.id;
-      return `https://github.com/login/oauth/authorize?client_id=ee9b0ae4553f4fb449bf&state=${id}&redirect_uri=http://www.binlive.cn:3080/api/oauth`;
-    }
+      return `https://github.com/login/oauth/authorize?client_id=2cbb754c153faa480225&state=${id}&redirect_uri=http://localhost:1818/login`;
+    },
+    ...mapState("article", ["articleList", "articleDetail"])
   },
   components: {
-    Comment
+    Comment,
+    PreviewImage
   },
   beforeDestroy() {
-    window.loading = this.$loading({
-      lock: true,
-      text: "Loading",
-      background: "rgba(255, 255, 255, 0.7)"
-    });
     this.SET_CATALOGUE([]);
   }
 };
@@ -203,37 +204,15 @@ export default {
   min-height: 500px;
   padding-top: 40px;
 }
-.detail-extra {
-  padding: 10px 0;
+.detail_extra {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  &_item {
+    cursor: pointer;
+    &:hover {
+      color: #2eb3ff;
+    }
+  }
 }
-.background {
-  width: 100%;
-  height: 100%;
-  background-color: #fff;
-  position: fixed;
-  left: 0px;
-  top: 0px;
-  z-index: 888;
-  padding-top: 140px;
-}
-.img-wrapper {
-  width: 80%;
-  height: 100%;
-  overflow: auto;
-  margin: 0 auto;
-  padding: 0px 0px 30px 0px;
-}
-.img-wrapper img {
-  width: 100%;
-  transition: all 0.3s ease-in-out;
-}
-.close {
-  position: fixed;
-  right: 4%;
-  top: 130px;
-  width: 50px;
-  opacity: 0.4;
-  cursor: pointer;
-}
-
 </style>

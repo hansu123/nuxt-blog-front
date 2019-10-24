@@ -11,5 +11,17 @@ class ArticleModel{
   ArticleSearch(data){
     return post("/article/search",data)
   }
+
+  GetCommentList(params){
+    return get("/article/commonList",params)
+  }
+
+  AddComment(data){
+    return post("/article/comment",data)
+  }
+
+  AddSubComment(data){
+    return post("/article/subComment",data)
+  }
 }
 export default new ArticleModel()

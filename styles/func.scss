@@ -47,14 +47,14 @@
 .wes-#{$i} {
   overflow: hidden;
   @if($i==1){
-    word-wrap:normal;
-    white-space:nowrap;
-    text-overflow:ellipsis;
+    word-wrap:normal !important;
+    white-space:nowrap !important;
+    text-overflow:ellipsis !important;
   }
   @else{
-    display: -webkit-box;
-    white-space:normal;
-    -webkit-box-orient: vertical;
+    display: -webkit-box !important;
+    white-space:normal !important;
+    -webkit-box-orient: vertical !important;
     -webkit-line-clamp: $i;
   }
 }

@@ -17,22 +17,23 @@
   </div>
 </template>
 <script>
-import ArticleList from "@/components/ArticleList";
+import { ArticleList } from "@/components";
 import ArticleModel from "@/apis/articleModel";
+import { mapMutations } from "vuex";
 export default {
   name: "latestArticles",
   head() {
     return {
-      title: "binlive",
+      title: "hanblog",
       meta: [
         {
           hid: "description",
           name: "description",
-          content: "binlive前端开发,前端,web前端开发,node,vue,react,webpack,git"
+          content: "jed前端开发,前端,web前端开发,node,vue,react,webpack,git"
         },
         {
           name: "keywords",
-          content: "binlive前端开发,前端,web前端开发,node,vue,react,webpack,git"
+          content: "jed前端开发,前端,web前端开发,node,vue,react,webpack,git"
         }
       ]
     };
@@ -47,11 +48,11 @@ export default {
       return {
         articleList: list,
         currentPage: 1,
-        pagesize:10,
+        pagesize: 10,
         lastpage: false,
         fadetitle: true,
         showScroll: false,
-        showLoading:false
+        showLoading: false
       };
     } catch (err) {
       error({ statusCode: 404 });
@@ -62,7 +63,9 @@ export default {
   },
   mounted() {
     // const { newArticlelist } = this.$store.state;
+    this.SET_ARTICLELIST(this.articleList);
     window.addEventListener("scroll", this.handleScroll);
+
     if (window.loading) {
       window.loading.close();
     }
@@ -83,10 +86,10 @@ export default {
         if (list.length) {
           this.articleList = [...this.articleList, ...list];
           this.showScroll = false;
-          this.showLoading=false;
+          this.showLoading = false;
         } else {
           this.lastpage = true;
-          this.showLoading=false;
+          this.showLoading = false;
           this.showScroll = false;
         }
       }
@@ -104,7 +107,8 @@ export default {
           this.nextpage();
         }
       }
-    }
+    },
+    ...mapMutations("article", ["SET_ARTICLELIST"])
   },
   beforeDestroy() {
     window.removeEventListener("scroll", this.handleScroll, false);
@@ -112,8 +116,30 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .lastpagetip {
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
   font-size: 14px;
+  color: #999;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 6px;
+  margin-bottom: -1px;
+}
+
+.scrollbottomtip {
+  & > div {
+    width: 140px;
+    margin: 0 auto;
+    & > p {
+      float: left;
+      margin-left: 14px;
+    }
+    & > i {
+      margin-top: 4px;
+      color: #999;
+    }
+  }
 }
 </style>

@@ -15,12 +15,10 @@
 </template>
 
 <script>
- 
-  import ArticleList from '@/components/ArticleList';
-  import {dateFormat} from '@/utils/index';
+  import {ArticleList} from '@/components';
   import ArticleModel from "@/apis/articleModel"
   import { Message } from 'element-ui';
-  dateFormat();
+
   export default {
     name: 'searchList',
     head () {
@@ -41,9 +39,6 @@
           keyword:search
         }
         const {list} = await ArticleModel.ArticleSearch(query);
-        if(list.length===0){
-          Message.error("空空如也")
-        }
         return {
           searchList: list,
           search,
